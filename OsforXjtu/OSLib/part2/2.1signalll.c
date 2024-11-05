@@ -77,9 +77,7 @@ main ()
       else
         {
           printf ("[c1]succeed to set signal, listening to %d\n", 16);
-          //   kill (getpid (), 16);
         }
-      // pause ();
       while (true)
         sleep (1);
       printf ("[c1]end of child process : %d\n", getpid ());
@@ -102,9 +100,7 @@ main ()
           else
             {
               printf ("[c2]succeed to set signal, listening to %d\n", 17);
-              // kill (getpid (), 17);
             }
-          // pause ();
           while (true)
             sleep (1);
           printf ("[c2]end of child process : %d\n", getpid ());
