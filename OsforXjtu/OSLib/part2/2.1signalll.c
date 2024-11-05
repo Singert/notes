@@ -32,8 +32,6 @@ parent_handler (int signo)
       printf ("[p]process %d SIG %d send to child process %d\n", getpid (), 17,
               rc2);
     }
-  printf ("[p]child %d waited\n", wait (NULL));
-  printf ("[p]child %d waited\n", wait (NULL));
 }
 
 void
@@ -61,6 +59,8 @@ int
 main ()
 {
   signal (SIGINT, void_handler);
+  signal (SIGQUIT, void_handler);
+  signal (SIGALRM, void_handler);
   rc1 = fork ();
   if (rc1 < 0)
     {
@@ -79,7 +79,8 @@ main ()
           printf ("[c1]succeed to set signal, listening to %d\n", 16);
         }
       while (true)
-        sleep (1);
+        // sleep (1);
+        ;
       printf ("[c1]end of child process : %d\n", getpid ());
     }
   else if (rc1 > 0)
@@ -102,12 +103,15 @@ main ()
               printf ("[c2]succeed to set signal, listening to %d\n", 17);
             }
           while (true)
-            sleep (1);
+            // sleep (1)
+            ;
           printf ("[c2]end of child process : %d\n", getpid ());
         }
       else if (rc2 > 0)
         {
-          if (signal (SIGINT, parent_handler) == SIG_ERR)
+          if (signal (SIGINT, parent_handler) == SIG_ERR
+              && signal (SIGALRM, parent_handler)
+              && signal (SIGQUIT, parent_handler))
             {
               printf ("[p]failed to set signal\n");
             }
@@ -115,9 +119,12 @@ main ()
             {
               printf ("[p]succeed to set signal\n");
             }
-          printf ("[p]parent process (pid=%d) now waiting sigal:%d\n",
+          printf ("[p]parent process (pid=%d) now waiting sigal in five "
+                  "second:%d\n",
                   getpid (), SIGINT);
-          sleep (10000);
+          alarm (5);
+          printf ("[p]child %d waited\n", wait (NULL));
+          printf ("[p]child %d waited\n", wait (NULL));
           printf ("[p]end of the function\n");
         }
     }
