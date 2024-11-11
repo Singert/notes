@@ -8,7 +8,7 @@ int num = -1;
 
 
 int 
-main(){
+main() o{
     pid_t rc =fork();
     if (rc < 0)
     {

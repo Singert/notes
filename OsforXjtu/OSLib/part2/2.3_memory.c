@@ -593,8 +593,8 @@ show_alloc()
   {
     printf(" start_addr:%d\n",alloc_curr->start_addr);
     printf(" size:%d\n",alloc_curr->size);
-    printf("pid:%d\n",alloc_curr->pid);
-    printf("proc_name:%s\n",alloc_curr->pname);
+    printf(" pid:%d\n",alloc_curr->pid);
+    printf(" proc_name:%s\n",alloc_curr->pname);
     printf("|————————————————————|\n");
     alloc_curr = alloc_curr->next;
   }
