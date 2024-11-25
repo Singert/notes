@@ -1,6 +1,6 @@
 #include "include/common.h"
 
-struct ext2_inode_info
+struct ext2_inode_info_t
 {
   _u32 i_data[15];  //数据块指针数组;
   _u32 i_flags; //打开文件的方式;

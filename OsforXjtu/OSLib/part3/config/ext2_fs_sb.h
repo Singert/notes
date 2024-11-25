@@ -3,7 +3,7 @@
 
 //TODO:定义buffer_head,wait_queue
 
-struct ext2_sb_info
+struct ext2_sb_info_t
 {
   _u64 s_frag_size;          //片大小（以字节记）
   _u64 s_frags_per_block;    //每块中片数;
