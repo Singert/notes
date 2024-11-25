@@ -6,8 +6,7 @@
   15 //块指针数组元素个数,12个直接块指针.一个一级间接块指针、二级间接块指针，三级间接块指针；
 
 #include <sys/types.h>
-typedef struct ext2_super_block_t
-//来描述 Ext2 文件系统整体信息的数据结构
+typedef struct ext2_super_block_t //来描述 Ext2 文件系统整体信息的数据结构
 {
   _u32 s_inodes_count;      //文件系统中索引节点总数；
   _u32 s_blocks_count;      //文件系统中中块数
@@ -51,8 +50,8 @@ typedef struct ext2_super_block_t
   _u8 s_prealloc_blocks;     //预分配的块数；
   _u8 s_prealloc_dir_blocks; //给目录预分配的块数；
   _u16 s_paddingl;
-  _u32 s_reserved[204]; //用NULL填充块的末尾；
-}ext2_super_block_t;
+  _u32 s_reserved[972]; //用NULL填充块的末尾；
+} ext2_super_block_t;
 
 typedef struct ext2_inode_t //索引节点
 {
@@ -104,18 +103,16 @@ typedef struct ext2_inode_t //索引节点
   _u32 i_dir_acl;              //目录访问控制表;
   _u8 l_i_frg;                 //每块中的片数;
   _u32 i_faddr;                //片的地址
-}ext2_inode_t;
-
+} ext2_inode_t;
 
 struct ext_group_desc
 {
-  _u32 bg_block_bitmap;//组中块位图所在的块号
-  _u32 bg_inode_bitmap;//族中索引节点位图所在的块号;
-  _u32 bg_inode_table;//族中索引节点表的首块号;
-  _u16 bg_free_blocks_count;//组中空闲块数;
-  _u16 bg_free_inodes_count;//组中空闲索引节点数;
-  _u16 bg_used_dirs_count;//组中分配给目录的节点数;
-  _u16 bg_pad; //填充对齐到字;
-  _u32 bg_reserved[3]; //用NULL填充12个字;
-
+  _u32 bg_block_bitmap;      //组中块位图所在的块号
+  _u32 bg_inode_bitmap;      //族中索引节点位图所在的块号;
+  _u32 bg_inode_table;       //族中索引节点表的首块号;
+  _u16 bg_free_blocks_count; //组中空闲块数;
+  _u16 bg_free_inodes_count; //组中空闲索引节点数;
+  _u16 bg_used_dirs_count;   //组中分配给目录的节点数;
+  _u16 bg_pad;               //填充对齐到字;
+  _u32 bg_reserved[3];       //用NULL填充12个字;
 };

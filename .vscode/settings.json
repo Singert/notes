@@ -1,0 +1,5 @@
+{
+    "cmake.sourceDirectory": "/home/singer/Workspace/notes/OsforXjtu/OSLib",
+    "editor.defaultFormatter": "xaver.clang-format",
+    "editor.formatOnSave": true
+}

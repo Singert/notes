@@ -1,3 +1,3 @@
 #!/bin/bash
-dd if=/dev/zero of=../files/test.img bs=1K count=512000
+dd if=/dev/zero of=../files/test.img bs=4K count=262144
 
