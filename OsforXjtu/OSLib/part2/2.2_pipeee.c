@@ -25,12 +25,12 @@ main ()
   else if (rc1 == 0)
     {
       // child process 1;
-      lockf (fd[1], 1, 0);
+      // lockf (fd[1], 1, 0);
       for (int i = 0; i < 2000; i++)
         {
           dprintf (fd[1], "1");
         }
-      lockf (fd[1], 0, 0);
+      // lockf (fd[1], 0, 0);
       exit (0);
     }
   else if (rc1 > 0)
@@ -58,8 +58,8 @@ main ()
           printf ("close child process %d\n", wait (NULL));
           printf ("close child process %d\n", wait (NULL));
           printf ("receive starting...\n");
-          read(fd[0],buffer,BUFFER_SIZE);
-          printf("receive done: %s",buffer);
+          read (fd[0], buffer, BUFFER_SIZE);
+          printf ("receive done: %s", buffer);
         }
     }
   return 0;

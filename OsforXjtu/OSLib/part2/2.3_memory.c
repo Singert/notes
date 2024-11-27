@@ -181,34 +181,90 @@ init_mem_algo (int choice)
     }
 }
 
+// int
+// ma_FF (int pid, char *name, int size)
+// {
+//   int success = 0; //是否成功分配空间
+//   free_block_t *free_curr;
+//   free_curr = free_head;
+//   while (free_curr != NULL)
+//     {
+//       if (free_curr->size > size || free_curr->size == size)
+//         {
+
+//           allocated_block_t *alloca_temp
+//               = (allocated_block_t *)malloc (sizeof (allocated_block_t));
+//           allocated_block_t *alloca_curr
+//               = (allocated_block_t *)malloc (sizeof (allocated_block_t));
+//           alloca_curr = alloca_head;
+
+//           alloca_temp->pid = pid;
+//           strncpy (alloca_temp->pname, name, sizeof (alloca_temp->pname) -
+//           1); alloca_temp->size = size; alloca_temp->start_addr =
+//           free_curr->start_addr;
+//           //创建的allocated_block插入分配链表中
+//           if (alloca_head == NULL)
+//             {
+//               alloca_head = alloca_temp;
+//             }
+//           else
+//             {
+//               while (alloca_curr->next != NULL)
+//                 {
+//                   alloca_curr = alloca_curr->next;
+//                 }
+//               alloca_curr->next = alloca_temp;
+//             }
+
+//           free_curr->size = free_curr->size - size;
+//           free_curr->start_addr
+//               = free_curr->start_addr + size; //修改 空间区链表
+//           if (free_curr->size == 0)
+//             {
+//               free_curr = free_curr->next;
+//             }
+
+//           success = 1;
+//           break;
+//         }
+//       else
+//         {
+//           free_curr = free_curr->next;
+//         }
+//     }
+
+//   return success;
+// }
+
 int
 ma_FF (int pid, char *name, int size)
 {
-  int success = 0; //是否成功分配空间
-  free_block_t *free_curr;
-  free_curr = free_head;
+  int success = 0; // 是否成功分配空间
+  free_block_t *free_curr = free_head;
+
   while (free_curr != NULL)
     {
-      if (free_curr->size > size || free_curr->size == size)
+      if (free_curr->size >= size)
         {
-
+          // 分配新的已分配块
           allocated_block_t *alloca_temp
               = (allocated_block_t *)malloc (sizeof (allocated_block_t));
-          allocated_block_t *alloca_curr
-              = (allocated_block_t *)malloc (sizeof (allocated_block_t));
-          alloca_curr = alloca_head;
 
           alloca_temp->pid = pid;
           strncpy (alloca_temp->pname, name, sizeof (alloca_temp->pname) - 1);
+          alloca_temp->pname[sizeof (alloca_temp->pname) - 1]
+              = '\0'; // 确保字符串以'\0'结尾
           alloca_temp->size = size;
           alloca_temp->start_addr = free_curr->start_addr;
-          //创建的allocated_block插入分配链表中
+
+          // 插入到分配链表中
           if (alloca_head == NULL)
             {
               alloca_head = alloca_temp;
             }
           else
             {
+              allocated_block_t *alloca_curr = alloca_head;
               while (alloca_curr->next != NULL)
                 {
                   alloca_curr = alloca_curr->next;
@@ -216,10 +272,18 @@ ma_FF (int pid, char *name, int size)
               alloca_curr->next = alloca_temp;
             }
 
-          free_curr->size = free_curr->size - size;
-          free_curr->start_addr
-              = free_curr->start_addr + size; //修改 空间区链表
+          // 更新 free_curr 块的剩余大小和起始地址
+          free_curr->size -= size;
+          free_curr->start_addr += size;
+
+          // 如果该块的大小为0，移除该块
           if (free_curr->size == 0)
+            {
+              free_block_t *temp = free_curr;
+              free_curr = free_curr->next;
+              free (temp); // 释放已分配的空块
+            }
+          else
             {
               free_curr = free_curr->next;
             }
