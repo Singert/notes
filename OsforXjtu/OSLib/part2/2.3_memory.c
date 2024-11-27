@@ -567,69 +567,66 @@ free_mem (int pid)
 }
 
 void
-show_free()
+show_free ()
 {
-  printf("|————————————————————|\n");
-  free_block_t* free_curr;
+  printf ("|————————————————————|\n");
+  free_block_t *free_curr;
   free_curr = free_head;
-  while(free_curr != NULL)
-  {
-    printf(" start_addr:%d\n",free_curr->start_addr);
-    printf(" size:%d\n",free_curr->size);
-    printf("|————————————————————|\n");
-    free_curr = free_curr->next;
-  }
-  
-
+  while (free_curr != NULL)
+    {
+      printf (" start_addr:%d\n", free_curr->start_addr);
+      printf (" size:%d\n", free_curr->size);
+      printf ("|————————————————————|\n");
+      free_curr = free_curr->next;
+    }
 }
 
 void
-show_alloc()
+show_alloc ()
 {
-  printf("|————————————————————|\n");
-  allocated_block_t* alloc_curr;
+  printf ("|————————————————————|\n");
+  allocated_block_t *alloc_curr;
   alloc_curr = alloca_head;
-  while(alloc_curr != NULL)
-  {
-    printf(" start_addr:%d\n",alloc_curr->start_addr);
-    printf(" size:%d\n",alloc_curr->size);
-    printf(" pid:%d\n",alloc_curr->pid);
-    printf(" proc_name:%s\n",alloc_curr->pname);
-    printf("|————————————————————|\n");
-    alloc_curr = alloc_curr->next;
-  }
-  
-
+  while (alloc_curr != NULL)
+    {
+      printf (" start_addr:%d\n", alloc_curr->start_addr);
+      printf (" size:%d\n", alloc_curr->size);
+      printf (" pid:%d\n", alloc_curr->pid);
+      printf (" proc_name:%s\n", alloc_curr->pname);
+      printf ("|————————————————————|\n");
+      alloc_curr = alloc_curr->next;
+    }
 }
 
-
-void 
-show(int signal)
+void
+show (int signal)
 {
-  switch (signal) {
-  case 1:
-    printf("[show_free] begin \n");
-    show_free();
-    printf("[show_begin] success \n");
-    break;
-  case 2:
-    printf("[show_alloc] begin \n");
-    show_alloc();
-    printf("[show_alloc] success \n");
-    break;
-  }
+  switch (signal)
+    {
+    case 1:
+      printf ("[show_free] begin \n");
+      show_free ();
+      printf ("[show_begin] success \n");
+      break;
+    case 2:
+      printf ("[show_alloc] begin \n");
+      show_alloc ();
+      printf ("[show_alloc] success \n");
+      break;
+    }
 }
 
 void
 help ()
 {
   printf ("Usage: ./memory [OPTION],[AGRUMENT] [OPTION],[AGRUMENT]... \n"
-          " -1      set memory size (default=1024)\n"
-          " -2      select memory allocation algorithm\n"
-          " -3      new process,support creating no more than 10 processes\n"
-          " -4      terminate a process\n"
-          " -5      display memory usage\n"
-          " -0      exit\n");
+          " 1      set memory size (default=1024)\n"
+          " 2      select memory allocation algorithm\n"
+          "        [arugment] 1:MA_FF,2:MA_BF,3:MA_WF\n"
+          " 3      new process,support creating no more than 10 processes\n"
+          " 4      terminate a process\n"
+          " 5      display memory usage\n"
+          " 0      exit\n");
 }
 
 // TODO: parse command
@@ -684,7 +681,7 @@ parse_command (char *input)
     case 5:
       // TODO
       printf ("case 5");
-      show(cmd[1]);
+      show (cmd[1]);
       break;
     }
 }

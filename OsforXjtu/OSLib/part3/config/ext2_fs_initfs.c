@@ -1,6 +1,6 @@
-#include "ext2_fs_sb.h"
 #include "ext2_fs.h"
 #include "ext2_fs_i.h"
+#include "ext2_fs_sb.h"
 #include "include/common.h"
 
 #include <fcntl.h>
@@ -20,11 +20,32 @@ long img_size;    // img文件大小（byte）
 int group_number; // img所能容纳的块组个数；
 block_bit_map_t common_blk_btmp;
 inode_bit_map_t common_ind_btmp;
+inode_bit_map_t common_ind_btmp0;
+
+// 写入数据到指定块
+void
+write_blocks (int fd, const void *data, size_t size, int block_index,
+              int group_index)
+{
+  off_t offset = (group_index * UNIVERSAL_GRP_BLKS + block_index) * BLK_SIZE;
+  if (lseek (fd, offset, SEEK_SET) == -1)
+    {
+      perror ("lseek failed");
+      exit (EXIT_FAILURE);
+    }
+  if (write (fd, data, size) != (ssize_t)size)
+    {
+      perror ("write failed");
+      exit (EXIT_FAILURE);
+    }
+}
+
 //获取img的文件描述符;
 int
 init_fd ()
 {
-  img_fd = open (IMG_PATH, O_RDWR);
+  int img_fd = open (IMG_PATH, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+
   if (img_fd == -1)
     {
       fprintf (stderr, "open img failed");
@@ -73,7 +94,7 @@ init_blk_grp ()
 
 //创建一个通用的super_block
 void
-creat_common_spr_blk ()
+creat_common_spr_blk (_u32 group_index)
 {
   common_spr_blk.s_inodes_count
       = 2048 * group_number; // FIXME: 文件系统中索引节点总数；
@@ -90,9 +111,9 @@ creat_common_spr_blk ()
   common_spr_blk.s_mtime = (_u32)time (NULL); //最后一次安装操作的时间;
   common_spr_blk.s_wtime
       = (_u32)time (NULL); //最后一次对超级块进行写操作的时间;
-  common_spr_blk.s_first_ino = 0;      //第一个非保留的索引节点；
-  common_spr_blk.s_inode_size = 128;   //索引节点的大小；
-  common_spr_blk.s_block_group_nr = 0; //该超级块的块组号；
+  common_spr_blk.s_first_ino = 0;    //第一个非保留的索引节点；
+  common_spr_blk.s_inode_size = 128; //索引节点的大小；
+  common_spr_blk.s_block_group_nr = group_index; //该超级块的块组号；
 
   // performance hints.Directory preallocation should only
   //  happen if the EXT2_COMPAT_PREALLOC flag is on.
@@ -118,7 +139,7 @@ creat_common_group_desc ()
 
 //将某块/inode对应的字节设为1
 void
-set_block_used (unsigned char *bitmap, int block_index)
+set_block_used (_u8 *bitmap, int block_index)
 {
   int byte_index = block_index / BITS_PER_BYTE; // 找到对应字节
   int bit_index = block_index % BITS_PER_BYTE;  // 找到字节中的位
@@ -127,7 +148,7 @@ set_block_used (unsigned char *bitmap, int block_index)
 
 //将某块/inode对应的字节设为0
 void
-set_block_free (unsigned char *bitmap, int block_index)
+set_block_free (_u8 *bitmap, int block_index)
 {
   int byte_index = block_index / BITS_PER_BYTE; // 找到对应字节
   int bit_index = block_index % BITS_PER_BYTE;  // 找到字节中的位
@@ -136,7 +157,7 @@ set_block_free (unsigned char *bitmap, int block_index)
 
 //检查某一块/inode是否已用
 int
-is_block_used (unsigned char *bitmap, int block_index)
+is_block_used (_u8 *bitmap, int block_index)
 {
   int byte_index = block_index / BITS_PER_BYTE;        // 找到对应字节
   int bit_index = block_index % BITS_PER_BYTE;         // 找到字节中的位
@@ -144,20 +165,52 @@ is_block_used (unsigned char *bitmap, int block_index)
 }
 //初始化一个bitmap
 void
-init_block_bitmap (unsigned char *bitmap, int size)
+init_bitmap (_u8 *bitmap, int size)
 {
   memset (bitmap, 0, size); // 全部置零
 }
 
 //为文件系统块设置对应的位图已用
 void
-bit_map_reserve_system_blocks (unsigned char *bitmap, int count)
+bit_map_reserve_system_blocks (_u8 *bitmap, int count)
 {
   for (int i = 0; i < count; i++)
     {
       set_block_used (bitmap, count);
     }
 }
+
+//创建common_blk_btmp
+void
+creat_common_blk_btmp ()
+{
+  init_bitmap (common_blk_btmp, sizeof (common_blk_btmp));
+  bit_map_reserve_system_blocks (common_blk_btmp, 68);
+}
+
+//创建common_ind_btmp
+void
+creat_common_ind_btmp ()
+{
+  init_bitmap (common_ind_btmp, sizeof (common_ind_btmp));
+}
+
+// TODO:创建创建保留根目录inode的common_ind_btmp0;
+void
+creat_common_ind_btmp0 ()
+{
+}
+
+// TODO:创建根目录
+void
+creat_root_dir ()
+{
+}
+
+// TODO
+void creat_file (){
+
+};
 
 //格式化磁盘映像文件；
 void
@@ -171,17 +224,27 @@ init_file_system ()
     }
   //计算块组数量
   group_number = (int)img_size / UNIVERSAL_GRP_SIZE;
-
+  //打开fd
+  init_fd ();
+  //创建common_grp_dsc;
+  creat_common_group_desc ();
+  creat_common_blk_btmp ();
+  creat_common_ind_btmp ();
   //按组写入img;
   for (int i = 0; i < group_number; i++)
     {
+      creat_common_spr_blk (i);
+      write_blocks (img_fd, &common_spr_blk, sizeof (common_spr_blk), 0, i);
+      write_blocks (img_fd, &common_grp_dsc, sizeof (common_grp_dsc), 1, i);
+      write_blocks (img_fd, &common_blk_btmp, sizeof (common_blk_btmp), 2, i);
+      write_blocks (img_fd, &common_ind_btmp, sizeof (common_ind_btmp), 3, i);
     }
   // TODO
 }
 
 //分配空闲块
 int
-allocate_block (unsigned char *bitmap, int total_blocks)
+allocate_block (_u8 *bitmap, int total_blocks)
 {
   for (int i = 0; i < total_blocks; i++)
     {
@@ -196,15 +259,21 @@ allocate_block (unsigned char *bitmap, int total_blocks)
 }
 //释放空闲块
 void
-free_block (unsigned char *bitmap, int block_index)
+free_block (_u8 *bitmap, int block_index)
 {
   set_block_free (bitmap, block_index);
   // TODO：其他操作
 }
 
-int
-main ()
+void
+parse_cmd ()
 {
-
-  return 0;
 }
+
+// int
+// main ()
+// {
+//   init_file_system ();
+
+//   return 0;
+// }
