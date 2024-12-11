@@ -27,8 +27,8 @@ main ()
       args[0] = "wc";
       args[1] = "Makefile";
       args[2] = NULL;
-      execvp (args[0], args);
       system ("./system_call");
+      execvp (args[0], args);
     }
 
   else if (rc > 0)

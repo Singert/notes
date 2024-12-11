@@ -64,11 +64,11 @@
 
 //   return 0;
 // }
-#include "ext2_fs_initfs.c"
+// #include "ext2_fs_initfs.c"
 
-int
-main ()
-{
-  init_file_system ();
-  return 0;
-}
+// int
+// main ()
+// {
+//   init_file_system ();
+//   return 0;
+// }

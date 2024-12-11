@@ -44,7 +44,7 @@ write_blocks (int fd, const void *data, size_t size, int block_index,
 int
 init_fd ()
 {
-  int img_fd = open (IMG_PATH, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+  int img_fd = open (IMG_PATH, O_RDWR | O_CREAT, 0644);
 
   if (img_fd == -1)
     {
@@ -270,10 +270,10 @@ parse_cmd ()
 {
 }
 
-// int
-// main ()
-// {
-//   init_file_system ();
+int
+main ()
+{
+  init_file_system ();
 
-//   return 0;
-// }
+  return 0;
+}
